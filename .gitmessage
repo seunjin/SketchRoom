@@ -1,12 +1,14 @@
 <type>(optional scope): <summary>
 
 # Examples:
-# chore(repo): initialize workspace
-# feat(server): add websocket gateway
-# fix(web): handle reconnect state
+# chore(repo): 초기 워크스페이스 구성
+# feat(server): 웹소켓 게이트웨이 추가
+# fix(web): 재연결 상태 처리 수정
 #
 # Types:
 # feat, fix, docs, style, refactor, test, chore, build, ci
 #
 # Scopes:
-# web, server, shared, repo
+# web, server, shared, repo, docs
+#
+# Write type/scope in English and summary/body in Korean.

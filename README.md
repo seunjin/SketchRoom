@@ -21,7 +21,15 @@ apps/
 packages/
   shared/
 docs/
+notes/ # local only, ignored by git
 ```
+
+## Project Documents
+
+- [브랜치 전략](docs/conventions/branching.md)
+- [커밋 컨벤션](docs/conventions/commit.md)
+- [Pull Request 규칙](docs/conventions/pull-request.md)
+- [로컬 Git Hooks 정책](docs/conventions/local-hooks.md)
 
 ## Commands
 

@@ -5,7 +5,12 @@ node_modules/
 dist/
 build/
 coverage/
-docs/
+
+# Local/private working notes
+notes/
+docs/_drafts/
+docs/work/
+*.local.md
 
 # Runtime and logs
 *.log
