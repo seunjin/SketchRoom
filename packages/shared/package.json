@@ -1,0 +1,6 @@
+{
+  "name": "@sketch-room/shared",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module"
+}

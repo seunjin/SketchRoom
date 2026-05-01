@@ -1,0 +1,12 @@
+{
+  "name": "sketch-room",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "pnpm@10.19.0",
+  "scripts": {
+    "dev:web": "pnpm --filter @sketch-room/web dev",
+    "dev:server": "pnpm --filter @sketch-room/server start:dev",
+    "build": "pnpm -r --if-present build",
+    "lint": "pnpm -r --if-present lint"
+  }
+}

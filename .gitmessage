@@ -1,0 +1,12 @@
+<type>(optional scope): <summary>
+
+# Examples:
+# chore(repo): initialize workspace
+# feat(server): add websocket gateway
+# fix(web): handle reconnect state
+#
+# Types:
+# feat, fix, docs, style, refactor, test, chore, build, ci
+#
+# Scopes:
+# web, server, shared, repo
