@@ -1,4 +1,1 @@
-export class UpdateRoomDto {
-  clientId?: string;
-  title?: string;
-}
+export class UpdateRoomDto {}
