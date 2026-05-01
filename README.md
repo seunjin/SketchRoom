@@ -2,7 +2,7 @@
 
 SketchRoom is a portfolio project for learning and demonstrating real-time communication with WebSocket.
 
-The first milestone is a minimal monorepo workspace with a React/Vite web app and a NestJS server. Chat, canvas synchronization, database integration, Docker, CI/CD, and deployment setup will be added in later milestones.
+The project currently has a React/Vite web app, a NestJS server, PostgreSQL connectivity through TypeORM, and basic deployment docs. Chat, canvas synchronization, and WebSocket gameplay features will be added in later milestones.
 
 ## Stack
 
@@ -28,6 +28,7 @@ notes/ # local only, ignored by git
 ## Project Documents
 
 - [로컬 개발환경](docs/local-development.md)
+- [데이터베이스 마이그레이션 기준](docs/database-migrations.md)
 - [브랜치 전략](docs/conventions/branching.md)
 - [커밋 컨벤션](docs/conventions/commit.md)
 - [Pull Request 규칙](docs/conventions/pull-request.md)
@@ -41,8 +42,11 @@ pnpm dev:web
 pnpm dev:server
 pnpm build
 pnpm lint
+pnpm db:migration:show
 ```
+
+DB 스키마 변경 기준은 `docs/database-migrations.md`에 정리한다.
 
 ## Current Scope
 
-This repository currently contains only the initial runnable workspace setup. WebSocket features, shared event contracts, persistence, Docker, and CI/CD are intentionally out of scope for this step.
+This repository currently contains the runnable workspace, deployment baseline, and database connection baseline. WebSocket features, shared event contracts, and domain persistence are planned for later milestones.

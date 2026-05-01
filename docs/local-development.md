@@ -117,7 +117,37 @@ curl http://localhost:3000/health/db
 }
 ```
 
-DB 연결은 NestJS `TypeOrmModule`과 `DATABASE_URL` 환경변수를 사용한다. 스키마 변경은 추후 TypeORM migration으로 관리한다.
+DB 연결은 NestJS `TypeOrmModule`과 `DATABASE_URL` 환경변수를 사용한다. 스키마 변경은 TypeORM migration으로 관리한다.
+
+## TypeORM Migration
+
+마이그레이션 기준은 `docs/database-migrations.md`를 따른다.
+
+현재 migration 상태 확인:
+
+```bash
+pnpm db:migration:show
+```
+
+Entity 변경분으로 migration 생성:
+
+```bash
+pnpm db:migration:generate src/database/migrations/CreateUsers
+```
+
+Migration 실행:
+
+```bash
+pnpm db:migration:run
+```
+
+Migration 되돌리기:
+
+```bash
+pnpm db:migration:revert
+```
+
+로컬과 운영 모두 `synchronize: false`를 유지한다. Entity 변경이 있으면 migration 파일을 같은 PR에 포함한다.
 
 ## 검증
 
