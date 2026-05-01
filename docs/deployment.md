@@ -71,7 +71,7 @@ WEB_ORIGIN=https://sketch-room-web.vercel.app
 DATABASE_URL=<Neon pooled connection string>
 ```
 
-서버는 TypeORM을 통해 `DATABASE_URL`로 PostgreSQL에 연결한다.
+서버는 TypeORM을 통해 `DATABASE_URL`로 PostgreSQL에 연결한다. DB 스키마 변경은 TypeORM migration으로 관리한다.
 
 `PORT`는 Render가 제공하는 값을 사용한다. 서버 코드는 `process.env.PORT ?? 3000`을 사용한다.
 
@@ -108,9 +108,32 @@ Docker 배포 전환은 TypeORM/PostgreSQL 연결 이후 검토한다.
 
 Render는 `main`에 변경이 병합되면 자동 배포한다. 가능하면 Render의 Auto-Deploy 설정은 CI 통과 후 배포되는 방식으로 유지한다.
 
+## 운영 DB Migration
+
+운영 DB migration은 자동 배포에 묶지 않고 수동으로 실행한다.
+
+기준 문서:
+
+```txt
+docs/database-migrations.md
+```
+
+실행 예시:
+
+```bash
+DATABASE_URL="<Neon connection string>" pnpm --filter @sketch-room/server migration:run
+```
+
+이 명령은 로컬 터미널에서 최신 `main` 코드를 기준으로 실행한다.
+
+실행 후 확인:
+
+```bash
+curl https://sketch-room-server.onrender.com/health/db
+```
+
 ## 추후 정리할 내용
 
-- TypeORM migration 전략
 - 채팅/게임 도메인 DB 모델 설계
 - WebSocket `wss://` 연결 설정
 - Render 무료 인스턴스 cold start 대응

@@ -7,6 +7,11 @@
     "dev:web": "pnpm --filter @sketch-room/web dev",
     "dev:server": "pnpm --filter @sketch-room/server start:dev",
     "build": "pnpm -r --if-present build",
-    "lint": "pnpm -r --if-present lint"
+    "lint": "pnpm -r --if-present lint",
+    "db:migration:create": "pnpm --filter @sketch-room/server migration:create",
+    "db:migration:generate": "pnpm --filter @sketch-room/server migration:generate",
+    "db:migration:run": "pnpm --filter @sketch-room/server migration:run",
+    "db:migration:revert": "pnpm --filter @sketch-room/server migration:revert",
+    "db:migration:show": "pnpm --filter @sketch-room/server migration:show"
   }
 }
