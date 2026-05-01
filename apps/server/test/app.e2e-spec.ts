@@ -1,26 +1,41 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
+import { HealthController } from './../src/health/health.controller';
+import { HealthService } from './../src/health/health.service';
 
-describe('AppController (e2e)', () => {
+describe('HealthController (e2e)', () => {
   let app: INestApplication<App>;
+  const dataSource = {
+    query: jest.fn(),
+  };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    dataSource.query.mockResolvedValue([{ '?column?': 1 }]);
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      controllers: [HealthController],
+      providers: [HealthService, { provide: DataSource, useValue: dataSource }],
     }).compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  it('/health (GET)', () => {
+    return request(app.getHttpServer()).get('/health').expect(200).expect({
+      status: 'ok',
+    });
+  });
+
+  it('/health/db (GET)', async () => {
+    await request(app.getHttpServer()).get('/health/db').expect(200).expect({
+      status: 'ok',
+    });
+    expect(dataSource.query).toHaveBeenCalledWith('SELECT 1');
   });
 
   afterEach(async () => {
