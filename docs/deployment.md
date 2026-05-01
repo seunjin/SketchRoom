@@ -68,7 +68,10 @@ Health Check Path: /health
 ```txt
 NODE_ENV=production
 WEB_ORIGIN=https://sketch-room-web.vercel.app
+DATABASE_URL=<Neon pooled connection string>
 ```
+
+서버는 TypeORM을 통해 `DATABASE_URL`로 PostgreSQL에 연결한다.
 
 `PORT`는 Render가 제공하는 값을 사용한다. 서버 코드는 `process.env.PORT ?? 3000`을 사용한다.
 
@@ -87,10 +90,13 @@ docker build -f Dockerfile.server -t sketchroom-server .
 로컬에서 컨테이너 실행:
 
 ```bash
-docker run --rm -p 3002:3000 --env PORT=3000 sketchroom-server
+docker run --rm -p 3002:3000 \
+  --env PORT=3000 \
+  --env DATABASE_URL="postgresql://sketchroom:sketchroom@host.docker.internal:15432/sketchroom?schema=public" \
+  sketchroom-server
 ```
 
-Docker 배포 전환은 Prisma/PostgreSQL 연결 이후 검토한다.
+Docker 배포 전환은 TypeORM/PostgreSQL 연결 이후 검토한다.
 
 ## CI/CD 기준
 
@@ -104,7 +110,8 @@ Render는 `main`에 변경이 병합되면 자동 배포한다. 가능하면 Ren
 
 ## 추후 정리할 내용
 
-- PostgreSQL 운영 DB 연결
+- TypeORM migration 전략
+- 채팅/게임 도메인 DB 모델 설계
 - WebSocket `wss://` 연결 설정
 - Render 무료 인스턴스 cold start 대응
 - 프론트엔드와 백엔드 CORS 설정
