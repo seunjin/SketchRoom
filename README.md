@@ -26,6 +26,7 @@ notes/ # local only, ignored by git
 
 ## Project Documents
 
+- [로컬 개발환경](docs/local-development.md)
 - [브랜치 전략](docs/conventions/branching.md)
 - [커밋 컨벤션](docs/conventions/commit.md)
 - [Pull Request 규칙](docs/conventions/pull-request.md)
