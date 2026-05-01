@@ -5,8 +5,26 @@
 ## 예정 배포 대상
 
 - Web: Vercel
-- Server: Render
+- Server: Render Docker Web Service
 - Database: PostgreSQL
+
+## 서버 Docker
+
+서버는 루트의 `Dockerfile.server`를 사용한다.
+
+로컬에서 이미지 빌드:
+
+```bash
+docker build -f Dockerfile.server -t sketchroom-server .
+```
+
+로컬에서 컨테이너 실행:
+
+```bash
+docker run --rm -p 3000:3000 --env PORT=3000 sketchroom-server
+```
+
+Render에서는 Dockerfile 경로를 `Dockerfile.server`로 지정한다.
 
 ## 추후 정리할 내용
 
