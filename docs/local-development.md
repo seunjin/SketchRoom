@@ -2,7 +2,7 @@
 
 이 문서는 SketchRoom을 로컬에서 실행하기 위한 기본 규칙을 정리한다.
 
-현재 단계에서는 React/Vite 앱과 NestJS 서버만 실행한다. PostgreSQL, Prisma, Docker, WebSocket 기능 연결은 이후 단계에서 추가한다.
+현재 단계에서는 React/Vite 앱, NestJS 서버, 로컬 PostgreSQL 컨테이너만 실행한다. Prisma와 WebSocket 기능 연결은 이후 단계에서 추가한다.
 
 ## 요구사항
 
@@ -54,6 +54,56 @@ pnpm dev:server
 ```txt
 http://localhost:3000
 ```
+
+## 로컬 PostgreSQL
+
+PostgreSQL은 Docker Compose로 실행한다.
+
+```bash
+docker compose up -d postgres
+```
+
+상태 확인:
+
+```bash
+docker compose ps
+```
+
+종료:
+
+```bash
+docker compose down
+```
+
+데이터까지 삭제:
+
+```bash
+docker compose down -v
+```
+
+기본 연결 정보:
+
+```txt
+host: localhost
+port: 15432
+database: sketchroom
+user: sketchroom
+password: sketchroom
+```
+
+`docker-compose.yml`은 호스트 포트 `15432`를 컨테이너 내부 PostgreSQL 기본 포트 `5432`로 연결한다.
+
+```txt
+localhost:15432 -> postgres:5432
+```
+
+`DATABASE_URL`:
+
+```txt
+postgresql://sketchroom:sketchroom@localhost:15432/sketchroom?schema=public
+```
+
+현재 단계에서는 PostgreSQL 컨테이너만 준비하고, Prisma 또는 NestJS 연결은 이후 단계에서 추가한다.
 
 ## 검증
 
