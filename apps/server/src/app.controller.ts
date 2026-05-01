@@ -14,4 +14,9 @@ export class AppController {
   getHealth(): { status: string } {
     return this.appService.getHealth();
   }
+
+  @Get('health/db')
+  getDatabaseHealth(): Promise<{ status: string }> {
+    return this.appService.getDatabaseHealth();
+  }
 }

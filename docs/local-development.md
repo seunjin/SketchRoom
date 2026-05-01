@@ -2,7 +2,7 @@
 
 이 문서는 SketchRoom을 로컬에서 실행하기 위한 기본 규칙을 정리한다.
 
-현재 단계에서는 React/Vite 앱, NestJS 서버, 로컬 PostgreSQL 컨테이너만 실행한다. Prisma와 WebSocket 기능 연결은 이후 단계에서 추가한다.
+현재 단계에서는 React/Vite 앱, NestJS 서버, 로컬 PostgreSQL 컨테이너를 실행한다. TypeORM은 서버의 DB 연결 확인에 사용하고, WebSocket 기능 연결은 이후 단계에서 추가한다.
 
 ## 요구사항
 
@@ -103,7 +103,21 @@ localhost:15432 -> postgres:5432
 postgresql://sketchroom:sketchroom@localhost:15432/sketchroom?schema=public
 ```
 
-현재 단계에서는 PostgreSQL 컨테이너만 준비하고, Prisma 또는 NestJS 연결은 이후 단계에서 추가한다.
+DB 연결 확인:
+
+```bash
+curl http://localhost:3000/health/db
+```
+
+정상 응답:
+
+```json
+{
+  "status": "ok"
+}
+```
+
+DB 연결은 NestJS `TypeOrmModule`과 `DATABASE_URL` 환경변수를 사용한다. 스키마 변경은 추후 TypeORM migration으로 관리한다.
 
 ## 검증
 

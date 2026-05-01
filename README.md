@@ -8,8 +8,9 @@ The first milestone is a minimal monorepo workspace with a React/Vite web app an
 
 - Web: React, Vite, TypeScript
 - Server: NestJS, TypeScript
+- Database: PostgreSQL
+- ORM: TypeORM
 - Package manager: pnpm workspace
-- Planned database: PostgreSQL
 - Planned deployment: Vercel for web, Render for server
 
 ## Workspace
