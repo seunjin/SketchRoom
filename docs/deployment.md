@@ -26,6 +26,16 @@ docker run --rm -p 3000:3000 --env PORT=3000 sketchroom-server
 
 Render에서는 Dockerfile 경로를 `Dockerfile.server`로 지정한다.
 
+## CI/CD 기준
+
+현재 GitHub Actions는 CI만 담당한다.
+
+- Pull Request 대상이 `main`일 때 `lint`, `build`를 실행한다.
+- `main`에 push되면 같은 검증을 한 번 더 실행한다.
+- Vercel/Render 배포 자동화는 아직 포함하지 않는다.
+
+CD는 배포 대상과 환경변수 구성이 확정된 뒤 별도 단계에서 추가한다.
+
 ## 추후 정리할 내용
 
 - 환경 변수 관리
