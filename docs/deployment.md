@@ -26,6 +26,22 @@ docker run --rm -p 3000:3000 --env PORT=3000 sketchroom-server
 
 Render에서는 Dockerfile 경로를 `Dockerfile.server`로 지정한다.
 
+서버는 Render의 public traffic을 받을 수 있도록 `0.0.0.0`에 바인딩한다.
+
+Health Check Path:
+
+```txt
+/health
+```
+
+응답:
+
+```json
+{
+  "status": "ok"
+}
+```
+
 ## CI/CD 기준
 
 현재 GitHub Actions는 CI만 담당한다.
