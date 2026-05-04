@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   Param,
   Patch,
   Post,
@@ -16,8 +17,11 @@ export class RoomsController {
   constructor(private readonly roomsService: RoomsService) {}
 
   @Post()
-  create(@Body() createRoomDto: CreateRoomDto) {
-    return this.roomsService.create(createRoomDto);
+  create(
+    @Body() createRoomDto: CreateRoomDto,
+    @Headers('x-guest-id') guestId: string,
+  ) {
+    return this.roomsService.create(createRoomDto, guestId);
   }
 
   @Get()
