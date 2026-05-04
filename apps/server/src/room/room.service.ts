@@ -3,7 +3,7 @@ import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 
 @Injectable()
-export class RoomsService {
+export class RoomService {
   //생성
   create(createRoomDto: CreateRoomDto, guestId: string) {
     void createRoomDto;
@@ -13,7 +13,7 @@ export class RoomsService {
 
   //전체 조회
   findAll() {
-    return `This action returns all rooms`;
+    return `This action returns all room`;
   }
   //단일 조회
   findOne(id: number) {
