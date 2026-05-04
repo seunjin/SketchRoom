@@ -30,4 +30,7 @@ export class Room extends BaseTable {
 
   @Column({ default: 4 })
   maxParticipants: number;
+
+  @Column({ nullable: true })
+  passwordHash: string | null;
 }
