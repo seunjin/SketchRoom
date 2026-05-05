@@ -1,10 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateGuestDto } from './dto/create-guest.dto';
 import { UpdateGuestDto } from './dto/update-guest.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Guest } from './entity/guest.entity';
 import { Repository } from 'typeorm';
 import { randomBytes } from 'crypto';
+import { AppException } from '../common/exception/app.exception';
+import { ERROR_CODE } from '../common/constant/error-code.constant';
 
 @Injectable()
 export class GuestService {
@@ -23,7 +25,9 @@ export class GuestService {
 
   async findOne(id: string) {
     const guest = await this.guestRepository.findOneBy({ id });
-    if (!guest) throw new NotFoundException('Guest를 찾을 수 없습니다.');
+    if (!guest) {
+      throw new AppException(ERROR_CODE.GUEST_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
     return guest;
   }
 
@@ -48,6 +52,9 @@ export class GuestService {
       }
     }
 
-    throw new Error('Failed to generate display code');
+    throw new AppException(
+      ERROR_CODE.GUEST_DISPLAY_CODE_GENERATION_FAILED,
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
   }
 }

@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { DataSource, QueryFailedError, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoomParticipant } from './entity/room-participant.entity';
@@ -12,6 +6,8 @@ import { JoinRoomParticipantDto } from './dto/join-room-participant.dto';
 import { Room } from '../room/entity/room.entity';
 import { Guest } from '../guest/entity/guest.entity';
 import { verifyPassword } from '../common/util/password.util';
+import { AppException } from '../common/exception/app.exception';
+import { ERROR_CODE } from '../common/constant/error-code.constant';
 
 @Injectable()
 export class RoomParticipantService {
@@ -33,12 +29,20 @@ export class RoomParticipantService {
           lock: { mode: 'pessimistic_write' },
         });
 
-        if (!room) throw new NotFoundException('방이 존재하지 않습니다.');
+        if (!room) {
+          throw new AppException(
+            ERROR_CODE.ROOM_NOT_FOUND,
+            HttpStatus.NOT_FOUND,
+          );
+        }
 
         // 비밀방일때 비밀번호 검증
         if (!room.isPublic) {
           if (!joinRoomParticipantDto.password) {
-            throw new BadRequestException('비밀번호가 필요합니다.');
+            throw new AppException(
+              ERROR_CODE.ROOM_PASSWORD_REQUIRED,
+              HttpStatus.BAD_REQUEST,
+            );
           }
 
           if (
@@ -48,7 +52,10 @@ export class RoomParticipantService {
               room.passwordHash,
             ))
           ) {
-            throw new ForbiddenException('비밀번호가 일치하지 않습니다.');
+            throw new AppException(
+              ERROR_CODE.ROOM_PASSWORD_INVALID,
+              HttpStatus.FORBIDDEN,
+            );
           }
         }
 
@@ -57,21 +64,29 @@ export class RoomParticipantService {
           lock: { mode: 'pessimistic_write' },
         });
 
-        if (!guest) throw new NotFoundException('게스트가 존재하지 않습니다.');
+        if (!guest) {
+          throw new AppException(
+            ERROR_CODE.GUEST_NOT_FOUND,
+            HttpStatus.NOT_FOUND,
+          );
+        }
 
         const existingParticipant = await manager.findOneBy(RoomParticipant, {
           guestId,
         });
 
         if (existingParticipant)
-          throw new ConflictException('이미 방에 참가 중 입니다.');
+          throw new AppException(
+            ERROR_CODE.ALREADY_JOINED_ROOM,
+            HttpStatus.CONFLICT,
+          );
 
         const participantCount = await manager.countBy(RoomParticipant, {
           roomId,
         });
 
         if (participantCount >= room.maxParticipants) {
-          throw new ConflictException('방에 자리가 없습니다.');
+          throw new AppException(ERROR_CODE.ROOM_FULL, HttpStatus.CONFLICT);
         }
 
         const participant = manager.create(RoomParticipant, {
@@ -84,7 +99,10 @@ export class RoomParticipantService {
       });
     } catch (error) {
       if (this.isUniqueViolation(error)) {
-        throw new ConflictException('이미 방에 참가 중 입니다.');
+        throw new AppException(
+          ERROR_CODE.ALREADY_JOINED_ROOM,
+          HttpStatus.CONFLICT,
+        );
       }
 
       throw error;
@@ -111,7 +129,10 @@ export class RoomParticipantService {
       });
 
       if (!participant) {
-        throw new NotFoundException('참가자를 찾을 수 없습니다.');
+        throw new AppException(
+          ERROR_CODE.ROOM_PARTICIPANT_NOT_FOUND,
+          HttpStatus.NOT_FOUND,
+        );
       }
 
       const wasHost = participant.isHost;
