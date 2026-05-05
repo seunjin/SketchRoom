@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { Room } from './entity/room.entity';
@@ -12,6 +7,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Guest } from '../guest/entity/guest.entity';
 import { hashPassword } from '../common/util/password.util';
 import { RoomParticipant } from '../room-participant/entity/room-participant.entity';
+import { AppException } from '../common/exception/app.exception';
+import { ERROR_CODE } from '../common/constant/error-code.constant';
 
 @Injectable()
 export class RoomService {
@@ -24,7 +21,10 @@ export class RoomService {
     const isPublic = createRoomDto.isPublic ?? true;
 
     if (!isPublic && !createRoomDto.password)
-      throw new BadRequestException('비공개 방은 비밀번호가 필요합니다.');
+      throw new AppException(
+        ERROR_CODE.ROOM_PASSWORD_REQUIRED,
+        HttpStatus.BAD_REQUEST,
+      );
 
     const passwordHash = createRoomDto.password
       ? await hashPassword(createRoomDto.password)
@@ -33,7 +33,12 @@ export class RoomService {
     return this.dataSource.transaction(async (manager) => {
       const guest = await manager.findOneBy(Guest, { id: guestId });
 
-      if (!guest) throw new NotFoundException('게스트가 존재하지 않습니다.');
+      if (!guest) {
+        throw new AppException(
+          ERROR_CODE.GUEST_NOT_FOUND,
+          HttpStatus.NOT_FOUND,
+        );
+      }
 
       const room = await manager.save(
         manager.create(Room, {
@@ -73,7 +78,7 @@ export class RoomService {
     const room = await this.roomRepository.findOneBy({ id });
 
     if (!room) {
-      throw new NotFoundException('방이 존재하지 않습니다.');
+      throw new AppException(ERROR_CODE.ROOM_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     return this.withoutPasswordHash(room);
@@ -83,11 +88,11 @@ export class RoomService {
     const room = await this.roomRepository.findOneBy({ id });
 
     if (!room) {
-      throw new NotFoundException('방이 존재하지 않습니다.');
+      throw new AppException(ERROR_CODE.ROOM_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     if (room.hostGuestId !== guestId) {
-      throw new ForbiddenException('방장만 수정할 수 있습니다.');
+      throw new AppException(ERROR_CODE.ROOM_HOST_ONLY, HttpStatus.FORBIDDEN);
     }
 
     if (updateRoomDto.title !== undefined) {
@@ -108,14 +113,20 @@ export class RoomService {
 
     if (updateRoomDto.password !== undefined) {
       if (!updateRoomDto.password) {
-        throw new BadRequestException('비공개 방은 비밀번호가 필요합니다.');
+        throw new AppException(
+          ERROR_CODE.ROOM_PASSWORD_REQUIRED,
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       room.passwordHash = await hashPassword(updateRoomDto.password);
     }
 
     if (!room.passwordHash) {
-      throw new BadRequestException('비공개 방은 비밀번호가 필요합니다.');
+      throw new AppException(
+        ERROR_CODE.ROOM_PASSWORD_REQUIRED,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const saveRoom = await this.roomRepository.save(room);
