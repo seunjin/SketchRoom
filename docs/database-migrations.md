@@ -50,6 +50,23 @@ docker compose up -d postgres
 pnpm db:migration:show
 ```
 
+로컬 개발용 자동 흐름:
+
+```bash
+pnpm db:migration:dev AddRoomParticipant
+```
+
+이 명령은 다음 작업을 순서대로 실행한다.
+
+```txt
+1. migration 생성
+2. 생성된 migration 파일 prettier 포맷
+3. 로컬 DB에 migration 실행
+4. migration 적용 상태 확인
+```
+
+생성된 migration은 자동 실행 후에도 반드시 직접 읽고 PR에 포함한다.
+
 Entity 변경분으로 migration 생성:
 
 ```bash
