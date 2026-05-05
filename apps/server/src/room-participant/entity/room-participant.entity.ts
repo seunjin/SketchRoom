@@ -12,7 +12,7 @@ export class RoomParticipant extends BaseTable {
   @JoinColumn({ name: 'roomId' })
   room: Room;
 
-  @Column({ unique: true })
+  @Column()
   guestId: string;
 
   @OneToOne(() => Guest, { nullable: false, onDelete: 'CASCADE' })

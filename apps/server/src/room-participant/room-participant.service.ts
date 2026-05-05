@@ -97,7 +97,34 @@ export class RoomParticipantService {
       throw new NotFoundException('참가자를 찾을 수 없습니다.');
     }
 
+    const wasHost = participant.isHost;
+
     await this.roomParticipantRepository.remove(participant);
-    return { success: true };
+
+    const remainingParticipants = await this.roomParticipantRepository.find({
+      where: { roomId },
+      relations: { guest: true },
+      order: { createdAt: 'ASC' },
+    });
+
+    if (remainingParticipants.length === 0) {
+      await this.roomRepository.delete({ id: roomId });
+
+      return { success: true, deletedRoom: true };
+    }
+
+    if (wasHost) {
+      const nextHost = remainingParticipants[0];
+      nextHost.isHost = true;
+
+      await this.roomParticipantRepository.save(nextHost);
+
+      await this.roomRepository.update(roomId, {
+        hostGuestId: nextHost.guestId,
+        hostNickname: nextHost.guest.nickname,
+      });
+    }
+
+    return { success: true, deletedRoom: false };
   }
 }
