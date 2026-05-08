@@ -6,13 +6,13 @@ import {
   type ApiResponse,
 } from "../lib/api";
 
-export const Route = createFileRoute("/")({
-  component: HomePage,
-});
-
 interface HealthResponse {
   status: string;
 }
+
+export const Route = createFileRoute("/")({
+  component: HomePage,
+});
 
 function HomePage() {
   const healthQuery = useQuery({
