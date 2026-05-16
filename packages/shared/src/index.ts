@@ -9,3 +9,9 @@ export type {
   UpdateGuestRequest,
 } from "./guest.js";
 export type { HealthResponse } from "./health.js";
+export type {
+  CreateRoomRequest,
+  Room,
+  RoomStatus,
+  UpdateRoomRequest,
+} from "./room.js";
