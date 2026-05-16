@@ -16,6 +16,9 @@
     },
     "./health": {
       "types": "./src/health.ts"
+    },
+    "./room": {
+      "types": "./src/room.ts"
     }
   },
   "sideEffects": false
