@@ -1,3 +1,1 @@
-export interface HealthResponse {
-  status: string;
-}
+export type { HealthResponse } from "@sketch-room/shared";
