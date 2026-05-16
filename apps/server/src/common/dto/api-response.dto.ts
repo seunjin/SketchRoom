@@ -4,12 +4,12 @@ export interface ApiResponse<T> {
   statusCode: number;
   code: string;
   message: string;
-  data: T | null;
+  data: T;
   meta?: ApiResponseMeta;
 }
 
 export interface ApiResponsePayload<T> {
-  data: T | null;
+  data: T;
   code?: string;
   message?: string;
   meta?: ApiResponseMeta;

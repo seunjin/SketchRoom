@@ -13,12 +13,12 @@ import { RESPONSE_MESSAGE } from '../constant/response-message.constant';
 @Injectable()
 export class ApiResponseInterceptor<T> implements NestInterceptor<
   T,
-  ApiResponse<T>
+  ApiResponse<T | null>
 > {
   intercept(
     context: ExecutionContext,
     next: CallHandler<T>,
-  ): Observable<ApiResponse<T>> {
+  ): Observable<ApiResponse<T | null>> {
     const response = context.switchToHttp().getResponse<Response>();
 
     return next.handle().pipe(
@@ -36,7 +36,7 @@ export class ApiResponseInterceptor<T> implements NestInterceptor<
     );
   }
 
-  private toPayload(data: T): ApiResponsePayload<T> {
+  private toPayload(data: T): ApiResponsePayload<T | null> {
     if (this.isApiResponsePayload(data)) {
       return data;
     }
@@ -46,7 +46,9 @@ export class ApiResponseInterceptor<T> implements NestInterceptor<
     };
   }
 
-  private isApiResponsePayload(data: T): data is T & ApiResponsePayload<T> {
+  private isApiResponsePayload(
+    data: T,
+  ): data is T & ApiResponsePayload<T | null> {
     if (typeof data !== 'object' || data === null || !('data' in data)) {
       return false;
     }
