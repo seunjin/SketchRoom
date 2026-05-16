@@ -12,12 +12,15 @@ export type ApiResponseMeta = Record<string, unknown>;
  * 성공과 실패 모두 같은 envelope를 사용합니다.
  * 성공 응답에서는 data에 실제 payload가 들어가고,
  * 에러 응답에서는 data가 null이며 code/message로 실패 이유를 구분합니다.
+ *
+ * data가 null일 수 있는지는 공통 타입이 아니라 endpoint별 제네릭 타입으로 표현합니다.
+ * 예: ApiResponse<Room[]>, ApiResponse<Room>, ApiResponse<null>
  */
 export interface ApiResponse<T> {
   statusCode: number;
   code: string;
   message: string;
-  data: T | null;
+  data: T;
   meta?: ApiResponseMeta;
 }
 

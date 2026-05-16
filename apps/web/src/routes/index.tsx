@@ -1,14 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  apiClient,
-  getApiErrorResponse,
-  type ApiResponse,
-} from "../lib/api";
-
-interface HealthResponse {
-  status: string;
-}
+import { getHealth, healthKeys } from "../features/health";
+import { getApiErrorResponse } from "../shared/api";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -16,14 +9,8 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const healthQuery = useQuery({
-    queryKey: ["health"],
-    queryFn: async () => {
-      const response = await apiClient
-        .get("health")
-        .json<ApiResponse<HealthResponse>>();
-
-      return response.data;
-    },
+    queryKey: healthKeys.status(),
+    queryFn: getHealth,
   });
 
   const apiError = getApiErrorResponse(healthQuery.error);
