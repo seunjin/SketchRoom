@@ -27,6 +27,7 @@
     "migration:show": "pnpm typeorm migration:show -d src/database/data-source.ts"
   },
   "dependencies": {
+    "@sketch-room/shared": "workspace:*",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",

@@ -1,12 +1,6 @@
-export type ApiResponseMeta = Record<string, unknown>;
+import type { ApiResponseMeta } from '@sketch-room/shared';
 
-export interface ApiResponse<T> {
-  statusCode: number;
-  code: string;
-  message: string;
-  data: T;
-  meta?: ApiResponseMeta;
-}
+export type { ApiResponse, ApiResponseMeta } from '@sketch-room/shared';
 
 export interface ApiResponsePayload<T> {
   data: T;
