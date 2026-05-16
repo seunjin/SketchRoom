@@ -1,7 +1,12 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { createGuest, getGuest, guestId, guestKeys } from "../features/guest";
+import { Link, createFileRoute } from "@tanstack/react-router";
+import {
+  createGuest,
+  getGuest,
+  guestKeys,
+  useGuestSession,
+} from "../features/guest";
 import { getApiErrorResponse } from "../shared/api";
 
 export const Route = createFileRoute("/")({
@@ -10,7 +15,11 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const [nickname, setNickname] = useState("");
-  const [currentGuestId, setCurrentGuestId] = useState(() => guestId.get());
+  const {
+    guestId: currentGuestId,
+    setGuestId,
+    clearGuestId,
+  } = useGuestSession();
 
   const guestQuery = useQuery({
     queryKey: currentGuestId
@@ -24,7 +33,7 @@ function HomePage() {
   const createGuestMutation = useMutation({
     mutationFn: createGuest,
     onSuccess: (guest) => {
-      setCurrentGuestId(guest.id);
+      setGuestId(guest.id);
       setNickname("");
     },
   });
@@ -39,8 +48,8 @@ function HomePage() {
       return;
     }
 
-    guestId.clear();
-  }, [guestQueryError?.code]);
+    clearGuestId();
+  }, [clearGuestId, guestQueryError?.code]);
 
   function handleCreateGuest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -110,6 +119,15 @@ function HomePage() {
           {createGuestMutation.isError &&
             (createGuestError?.message ?? "게스트를 생성하지 못했습니다.")}
         </p>
+
+        {guestQuery.isSuccess && (
+          <Link
+            className="inline-flex h-11 w-fit items-center rounded-md bg-accent px-4 text-sm font-medium text-accent-foreground"
+            to="/rooms"
+          >
+            방 목록으로 이동
+          </Link>
+        )}
       </section>
     </main>
   );

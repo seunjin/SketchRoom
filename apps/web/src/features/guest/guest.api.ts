@@ -1,5 +1,4 @@
 import { apiClient, type ApiResponse } from "../../shared/api";
-import { guestId } from "./guest.storage";
 import type {
   CreateGuestRequest,
   Guest,
@@ -12,9 +11,6 @@ export async function createGuest(request: CreateGuestRequest) {
       json: request,
     })
     .json<ApiResponse<Guest>>();
-
-  // 게스트아이디 로컬스토리지에 저장
-  guestId.set(response.data.id);
 
   return response.data;
 }
