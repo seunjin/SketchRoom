@@ -3,6 +3,7 @@ import type {
   JoinRoomParticipantRequest,
   LeaveRoomParticipantResponse,
   RoomParticipant,
+  UpdateRoomParticipantRequest,
 } from "./room-participant.types";
 
 export async function getRoomParticipants(roomId: string) {
@@ -38,6 +39,23 @@ export async function leaveRoom(roomId: string, guestId: string) {
       },
     })
     .json<ApiResponse<LeaveRoomParticipantResponse>>();
+
+  return response.data;
+}
+
+export async function updateRoomParticipant(
+  roomId: string,
+  request: UpdateRoomParticipantRequest,
+  guestId: string,
+) {
+  const response = await apiClient
+    .patch(`rooms/${roomId}/participants/me`, {
+      headers: {
+        "x-guest-id": guestId,
+      },
+      json: request,
+    })
+    .json<ApiResponse<RoomParticipant>>();
 
   return response.data;
 }

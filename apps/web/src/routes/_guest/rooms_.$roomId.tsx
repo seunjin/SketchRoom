@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "@woon-ui/toast";
@@ -22,6 +21,7 @@ import {
   leaveRoom,
   roomKeys,
   roomParticipantKeys,
+  updateRoomParticipant,
   type Room,
   type RoomParticipant,
 } from "../../features/room";
@@ -37,6 +37,7 @@ interface DisplayParticipant {
   id: string;
   isFallbackHost: boolean;
   isHost: boolean;
+  isReady: boolean;
   name: string;
 }
 
@@ -63,9 +64,6 @@ function WaitingRoomPage() {
   const { roomId } = Route.useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [readyGuestIds, setReadyGuestIds] = useState<Set<string>>(
-    () => new Set(),
-  );
 
   const guestQuery = useQuery({
     queryKey: guestKeys.detail(guestId),
@@ -96,7 +94,7 @@ function WaitingRoomPage() {
   );
   const isCurrentGuestInRoom = Boolean(currentParticipant);
   const isCurrentGuestHost = Boolean(currentParticipant?.isHost);
-  const isReady = readyGuestIds.has(guestId);
+  const isReady = currentParticipant?.isReady ?? false;
   const currentPlayerName = guestQuery.data?.nickname ?? "Guest";
   const currentPlayerCode = guestQuery.data?.displayCode ?? "READY";
   const roomError = getApiErrorResponse(roomQuery.error);
@@ -136,18 +134,33 @@ function WaitingRoomPage() {
     },
   });
 
+  const updateReadyMutation = useMutation({
+    mutationFn: (nextIsReady: boolean) =>
+      updateRoomParticipant(roomId, { isReady: nextIsReady }, guestId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: roomParticipantKeys.list(roomId),
+      });
+    },
+    onError: (error) => {
+      toast(
+        {
+          title: "준비 상태를 바꾸지 못했습니다",
+          description:
+            getApiErrorResponse(error)?.message ??
+            "잠시 후 다시 시도해 주세요.",
+        },
+        { tone: "danger" },
+      );
+    },
+  });
+
   function handleToggleReady() {
-    setReadyGuestIds((current) => {
-      const nextReadyGuestIds = new Set(current);
+    if (!isCurrentGuestInRoom || updateReadyMutation.isPending) {
+      return;
+    }
 
-      if (nextReadyGuestIds.has(guestId)) {
-        nextReadyGuestIds.delete(guestId);
-      } else {
-        nextReadyGuestIds.add(guestId);
-      }
-
-      return nextReadyGuestIds;
-    });
+    updateReadyMutation.mutate(!isReady);
   }
 
   async function handleCopyInviteLink() {
@@ -293,7 +306,6 @@ function WaitingRoomPage() {
                   {displayParticipants.map((participant, index) => (
                     <ParticipantRow
                       isMe={participant.guestId === guestId}
-                      isReady={readyGuestIds.has(participant.guestId)}
                       key={participant.id}
                       participant={participant}
                       toneIndex={index}
@@ -318,11 +330,20 @@ function WaitingRoomPage() {
                       ? "bg-accent text-accent-foreground"
                       : "bg-primary text-primary-foreground"
                   }`}
-                  disabled={!isCurrentGuestInRoom}
+                  disabled={
+                    !isCurrentGuestInRoom || updateReadyMutation.isPending
+                  }
                   onClick={handleToggleReady}
                   type="button"
                 >
-                  <Check aria-hidden="true" className="size-4" />
+                  {updateReadyMutation.isPending ? (
+                    <Loader2
+                      aria-hidden="true"
+                      className="size-4 animate-spin"
+                    />
+                  ) : (
+                    <Check aria-hidden="true" className="size-4" />
+                  )}
                   {isReady ? "준비 완료" : "준비하기"}
                 </button>
 
@@ -426,12 +447,10 @@ function WaitingSlot({ slot }: { slot: WaitingRoomSlot }) {
 
 function ParticipantRow({
   isMe,
-  isReady,
   participant,
   toneIndex,
 }: {
   isMe: boolean;
-  isReady: boolean;
   participant: DisplayParticipant;
   toneIndex: number;
 }) {
@@ -468,7 +487,7 @@ function ParticipantRow({
             className="size-4 shrink-0 text-primary-foreground"
           />
         )}
-        {isReady && (
+        {participant.isReady && (
           <span className="grid size-6 place-items-center rounded-full bg-accent text-accent-foreground">
             <Check aria-label="준비 완료" className="size-3.5" />
           </span>
@@ -543,6 +562,7 @@ function getDisplayParticipants(room: Room, participants: RoomParticipant[]) {
       id: participant.id,
       isFallbackHost: false,
       isHost: participant.isHost || participant.guestId === room.hostGuestId,
+      isReady: participant.isReady,
       name:
         participant.guest?.nickname ??
         (participant.guestId === room.hostGuestId
@@ -557,6 +577,7 @@ function getDisplayParticipants(room: Room, participants: RoomParticipant[]) {
       id: `${room.id}-host`,
       isFallbackHost: true,
       isHost: true,
+      isReady: false,
       name: room.hostNickname,
     });
   }

@@ -3,6 +3,7 @@ import { DataSource, QueryFailedError, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoomParticipant } from './entity/room-participant.entity';
 import { JoinRoomParticipantDto } from './dto/join-room-participant.dto';
+import { UpdateRoomParticipantDto } from './dto/update-room-participant.dto';
 import { Room } from '../room/entity/room.entity';
 import { Guest } from '../guest/entity/guest.entity';
 import { verifyPassword } from '../common/util/password.util';
@@ -119,6 +120,30 @@ export class RoomParticipantService {
         createdAt: 'ASC',
       },
     });
+  }
+
+  async updateMe(
+    roomId: string,
+    guestId: string,
+    updateRoomParticipantDto: UpdateRoomParticipantDto,
+  ) {
+    const participant = await this.roomParticipantRepository.findOne({
+      where: { roomId, guestId },
+      relations: {
+        guest: true,
+      },
+    });
+
+    if (!participant) {
+      throw new AppException(
+        ERROR_CODE.ROOM_PARTICIPANT_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    participant.isReady = updateRoomParticipantDto.isReady;
+
+    return this.roomParticipantRepository.save(participant);
   }
 
   async leave(roomId: string, guestId: string) {

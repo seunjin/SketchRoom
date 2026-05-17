@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Param,
   Delete,
   Headers,
@@ -9,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { RoomParticipantService } from './room-participant.service';
 import { JoinRoomParticipantDto } from './dto/join-room-participant.dto';
+import { UpdateRoomParticipantDto } from './dto/update-room-participant.dto';
 @Controller('rooms/:roomId/participants')
 export class RoomParticipantController {
   constructor(
@@ -30,6 +32,19 @@ export class RoomParticipantController {
   @Get()
   findAllByRoom(@Param('roomId') roomId: string) {
     return this.roomParticipantService.findAllByRoom(roomId);
+  }
+
+  @Patch('me')
+  updateMe(
+    @Param('roomId') roomId: string,
+    @Headers('x-guest-id') guestId: string,
+    @Body() updateRoomParticipantDto: UpdateRoomParticipantDto,
+  ) {
+    return this.roomParticipantService.updateMe(
+      roomId,
+      guestId,
+      updateRoomParticipantDto,
+    );
   }
 
   @Delete('me')
