@@ -173,6 +173,10 @@ function WaitingRoomPage() {
         title: "게임을 시작했습니다",
         description: startedRoom.title,
       });
+      void navigate({
+        to: "/play/$roomId",
+        params: { roomId: startedRoom.id },
+      });
     },
     onError: (error) => {
       toast(
@@ -422,6 +426,17 @@ function WaitingRoomPage() {
                     )}
                     {room.status === "PLAYING" ? "게임 진행 중" : "게임 시작"}
                   </button>
+                )}
+
+                {isCurrentGuestInRoom && room.status === "PLAYING" && (
+                  <Link
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-accent px-4 text-sm font-black text-accent-foreground transition"
+                    params={{ roomId: room.id }}
+                    to="/play/$roomId"
+                  >
+                    <Play aria-hidden="true" className="size-4" />
+                    게임 화면
+                  </Link>
                 )}
 
                 <button
