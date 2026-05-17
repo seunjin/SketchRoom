@@ -15,3 +15,8 @@ export type {
   RoomStatus,
   UpdateRoomRequest,
 } from "./room.js";
+export type {
+  JoinRoomParticipantRequest,
+  LeaveRoomParticipantResponse,
+  RoomParticipant,
+} from "./room-participant.js";

@@ -29,6 +29,7 @@ notes/ # local only, ignored by git
 
 - [로컬 개발환경](docs/local-development.md)
 - [데이터베이스 마이그레이션 기준](docs/database-migrations.md)
+- [게임 로비 디자인 가이드](docs/game-lobby-design.md)
 - [브랜치 전략](docs/conventions/branching.md)
 - [커밋 컨벤션](docs/conventions/commit.md)
 - [Pull Request 규칙](docs/conventions/pull-request.md)

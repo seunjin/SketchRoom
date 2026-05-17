@@ -1,5 +1,16 @@
 export { createRoom, getRoom, getRooms, updateRoom } from "./room.api";
+export {
+  getRoomParticipants,
+  joinRoom,
+  leaveRoom,
+} from "./room-participant.api";
+export { roomParticipantKeys } from "./room-participant.keys";
 export { roomKeys } from "./room.keys";
+export type {
+  JoinRoomParticipantRequest,
+  LeaveRoomParticipantResponse,
+  RoomParticipant,
+} from "./room-participant.types";
 export type {
   CreateRoomRequest,
   Room,
