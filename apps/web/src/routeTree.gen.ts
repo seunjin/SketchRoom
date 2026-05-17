@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as GuestRouteImport } from './routes/_guest'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GuestRoomsRouteImport } from './routes/_guest/rooms'
+import { Route as GuestRoomsRoomIdRouteImport } from './routes/_guest/rooms_.$roomId'
 
 const GuestRoute = GuestRouteImport.update({
   id: '/_guest',
@@ -27,27 +28,35 @@ const GuestRoomsRoute = GuestRoomsRouteImport.update({
   path: '/rooms',
   getParentRoute: () => GuestRoute,
 } as any)
+const GuestRoomsRoomIdRoute = GuestRoomsRoomIdRouteImport.update({
+  id: '/rooms_/$roomId',
+  path: '/rooms/$roomId',
+  getParentRoute: () => GuestRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/rooms': typeof GuestRoomsRoute
+  '/rooms/$roomId': typeof GuestRoomsRoomIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/rooms': typeof GuestRoomsRoute
+  '/rooms/$roomId': typeof GuestRoomsRoomIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_guest': typeof GuestRouteWithChildren
   '/_guest/rooms': typeof GuestRoomsRoute
+  '/_guest/rooms_/$roomId': typeof GuestRoomsRoomIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/rooms'
+  fullPaths: '/' | '/rooms' | '/rooms/$roomId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/rooms'
-  id: '__root__' | '/' | '/_guest' | '/_guest/rooms'
+  to: '/' | '/rooms' | '/rooms/$roomId'
+  id: '__root__' | '/' | '/_guest' | '/_guest/rooms' | '/_guest/rooms_/$roomId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -78,15 +87,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuestRoomsRouteImport
       parentRoute: typeof GuestRoute
     }
+    '/_guest/rooms_/$roomId': {
+      id: '/_guest/rooms_/$roomId'
+      path: '/rooms/$roomId'
+      fullPath: '/rooms/$roomId'
+      preLoaderRoute: typeof GuestRoomsRoomIdRouteImport
+      parentRoute: typeof GuestRoute
+    }
   }
 }
 
 interface GuestRouteChildren {
   GuestRoomsRoute: typeof GuestRoomsRoute
+  GuestRoomsRoomIdRoute: typeof GuestRoomsRoomIdRoute
 }
 
 const GuestRouteChildren: GuestRouteChildren = {
   GuestRoomsRoute: GuestRoomsRoute,
+  GuestRoomsRoomIdRoute: GuestRoomsRoomIdRoute,
 }
 
 const GuestRouteWithChildren = GuestRoute._addFileChildren(GuestRouteChildren)

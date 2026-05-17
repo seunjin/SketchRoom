@@ -5,9 +5,10 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "@woon-ui/toast";
 import {
+  ArrowRight,
   Brush,
   Crown,
   DoorOpen,
@@ -64,6 +65,7 @@ const avatarColors = [
 function RoomsPage() {
   const { guestId } = Route.useRouteContext();
   const dialog = useDialog();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const guestQuery = useQuery({
@@ -124,6 +126,10 @@ function RoomsPage() {
       title: "방을 만들었습니다",
       description: room.title,
     });
+    void navigate({
+      to: "/rooms/$roomId",
+      params: { roomId: room.id },
+    });
   }
 
   function handleRoomJoined(room: Room) {
@@ -131,6 +137,10 @@ function RoomsPage() {
     toast({
       title: "입장했습니다",
       description: room.title,
+    });
+    void navigate({
+      to: "/rooms/$roomId",
+      params: { roomId: room.id },
     });
   }
 
@@ -283,8 +293,16 @@ function RoomsPage() {
         </header>
 
         {joinedRoom && (
-          <div className="rounded-md border-2 border-accent bg-accent/10 px-4 py-3 text-sm font-black text-accent">
-            참여 중: {joinedRoom.title}
+          <div className="flex flex-col gap-3 rounded-md border-2 border-accent bg-accent/10 px-4 py-3 text-sm font-black text-accent sm:flex-row sm:items-center sm:justify-between">
+            <span className="min-w-0 truncate">참여 중: {joinedRoom.title}</span>
+            <Link
+              className="inline-flex h-9 w-fit items-center justify-center gap-2 rounded-md bg-accent px-3 text-xs font-black text-accent-foreground"
+              params={{ roomId: joinedRoom.id }}
+              to="/rooms/$roomId"
+            >
+              대기방
+              <ArrowRight aria-hidden="true" className="size-3.5" />
+            </Link>
           </div>
         )}
 
