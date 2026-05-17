@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
-import { Room } from './entity/room.entity';
+import { Room, RoomStatus } from './entity/room.entity';
 import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Guest } from '../guest/entity/guest.entity';
@@ -132,6 +132,60 @@ export class RoomService {
     const saveRoom = await this.roomRepository.save(room);
 
     return this.withoutPasswordHash(saveRoom);
+  }
+
+  async start(id: string, guestId: string) {
+    return this.dataSource.transaction(async (manager) => {
+      const room = await manager.findOne(Room, {
+        where: { id },
+        lock: { mode: 'pessimistic_write' },
+      });
+
+      if (!room) {
+        throw new AppException(ERROR_CODE.ROOM_NOT_FOUND, HttpStatus.NOT_FOUND);
+      }
+
+      if (room.hostGuestId !== guestId) {
+        throw new AppException(ERROR_CODE.ROOM_HOST_ONLY, HttpStatus.FORBIDDEN);
+      }
+
+      if (room.status !== RoomStatus.WAITING) {
+        throw new AppException(
+          ERROR_CODE.ROOM_NOT_WAITING,
+          HttpStatus.CONFLICT,
+        );
+      }
+
+      const participants = await manager.find(RoomParticipant, {
+        where: { roomId: id },
+        order: { createdAt: 'ASC' },
+      });
+
+      if (participants.length < 2) {
+        throw new AppException(
+          ERROR_CODE.ROOM_MIN_PARTICIPANTS,
+          HttpStatus.CONFLICT,
+        );
+      }
+
+      const hasUnreadyParticipant = participants.some(
+        (participant) =>
+          participant.guestId !== room.hostGuestId && !participant.isReady,
+      );
+
+      if (hasUnreadyParticipant) {
+        throw new AppException(
+          ERROR_CODE.ROOM_PARTICIPANTS_NOT_READY,
+          HttpStatus.CONFLICT,
+        );
+      }
+
+      room.status = RoomStatus.PLAYING;
+
+      const savedRoom = await manager.save(room);
+
+      return this.withoutPasswordHash(savedRoom);
+    });
   }
 
   private withoutPasswordHash(room: Room) {

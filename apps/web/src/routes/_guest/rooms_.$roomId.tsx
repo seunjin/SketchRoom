@@ -21,6 +21,7 @@ import {
   leaveRoom,
   roomKeys,
   roomParticipantKeys,
+  startRoomGame,
   updateRoomParticipant,
   type Room,
   type RoomParticipant,
@@ -95,6 +96,11 @@ function WaitingRoomPage() {
   const isCurrentGuestInRoom = Boolean(currentParticipant);
   const isCurrentGuestHost = Boolean(currentParticipant?.isHost);
   const isReady = currentParticipant?.isReady ?? false;
+  const isWaitingRoom = room?.status === "WAITING";
+  const hasEnoughParticipants = displayParticipants.length >= 2;
+  const areParticipantsReady = displayParticipants.every(
+    (participant) => participant.isHost || participant.isReady,
+  );
   const currentPlayerName = guestQuery.data?.nickname ?? "Guest";
   const currentPlayerCode = guestQuery.data?.displayCode ?? "READY";
   const roomError = getApiErrorResponse(roomQuery.error);
@@ -155,12 +161,58 @@ function WaitingRoomPage() {
     },
   });
 
+  const startGameMutation = useMutation({
+    mutationFn: () => startRoomGame(roomId, guestId),
+    onSuccess: (startedRoom) => {
+      queryClient.setQueryData(roomKeys.detail(roomId), startedRoom);
+      queryClient.invalidateQueries({ queryKey: roomKeys.lists() });
+      queryClient.invalidateQueries({
+        queryKey: roomParticipantKeys.list(roomId),
+      });
+      toast({
+        title: "게임을 시작했습니다",
+        description: startedRoom.title,
+      });
+    },
+    onError: (error) => {
+      toast(
+        {
+          title: "게임을 시작하지 못했습니다",
+          description:
+            getApiErrorResponse(error)?.message ??
+            "잠시 후 다시 시도해 주세요.",
+        },
+        { tone: "danger" },
+      );
+    },
+  });
+
+  const canStartGame =
+    isCurrentGuestHost &&
+    isCurrentGuestInRoom &&
+    isWaitingRoom &&
+    hasEnoughParticipants &&
+    areParticipantsReady &&
+    !startGameMutation.isPending;
+
   function handleToggleReady() {
-    if (!isCurrentGuestInRoom || updateReadyMutation.isPending) {
+    if (
+      !isCurrentGuestInRoom ||
+      !isWaitingRoom ||
+      updateReadyMutation.isPending
+    ) {
       return;
     }
 
     updateReadyMutation.mutate(!isReady);
+  }
+
+  function handleStartGame() {
+    if (!canStartGame) {
+      return;
+    }
+
+    startGameMutation.mutate();
   }
 
   async function handleCopyInviteLink() {
@@ -331,7 +383,9 @@ function WaitingRoomPage() {
                       : "bg-primary text-primary-foreground"
                   }`}
                   disabled={
-                    !isCurrentGuestInRoom || updateReadyMutation.isPending
+                    !isCurrentGuestInRoom ||
+                    !isWaitingRoom ||
+                    updateReadyMutation.isPending
                   }
                   onClick={handleToggleReady}
                   type="button"
@@ -344,17 +398,29 @@ function WaitingRoomPage() {
                   ) : (
                     <Check aria-hidden="true" className="size-4" />
                   )}
-                  {isReady ? "준비 완료" : "준비하기"}
+                  {isWaitingRoom
+                    ? isReady
+                      ? "준비 완료"
+                      : "준비하기"
+                    : "게임 진행 중"}
                 </button>
 
                 {isCurrentGuestHost && (
                   <button
                     className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-room-playing px-4 text-sm font-black text-foreground transition disabled:cursor-not-allowed disabled:opacity-50"
-                    disabled
+                    disabled={!canStartGame}
+                    onClick={handleStartGame}
                     type="button"
                   >
-                    <Play aria-hidden="true" className="size-4" />
-                    게임 시작
+                    {startGameMutation.isPending ? (
+                      <Loader2
+                        aria-hidden="true"
+                        className="size-4 animate-spin"
+                      />
+                    ) : (
+                      <Play aria-hidden="true" className="size-4" />
+                    )}
+                    {room.status === "PLAYING" ? "게임 진행 중" : "게임 시작"}
                   </button>
                 )}
 

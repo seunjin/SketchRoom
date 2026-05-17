@@ -33,6 +33,11 @@ export class RoomController {
     return this.roomService.findOne(id);
   }
 
+  @Post(':id/start')
+  start(@Param('id') id: string, @Headers('x-guest-id') guestId: string) {
+    return this.roomService.start(id, guestId);
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: string,

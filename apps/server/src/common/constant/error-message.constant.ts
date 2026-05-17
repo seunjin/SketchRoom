@@ -18,6 +18,11 @@ export const ERROR_MESSAGE = {
   [ERROR_CODE.ROOM_PASSWORD_INVALID]: '비밀번호를 다시 확인해 주세요.',
   [ERROR_CODE.ROOM_HOST_ONLY]: '방장만 변경할 수 있습니다.',
   [ERROR_CODE.ROOM_FULL]: '방이 가득 찼습니다.',
+  [ERROR_CODE.ROOM_NOT_WAITING]: '대기 중인 방에서만 할 수 있습니다.',
+  [ERROR_CODE.ROOM_MIN_PARTICIPANTS]:
+    '게임을 시작하려면 최소 2명이 필요합니다.',
+  [ERROR_CODE.ROOM_PARTICIPANTS_NOT_READY]:
+    '아직 준비하지 않은 참가자가 있습니다.',
 
   [ERROR_CODE.ROOM_PARTICIPANT_NOT_FOUND]:
     '방에 참여 중인 정보를 찾을 수 없습니다.',
