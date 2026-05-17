@@ -1,0 +1,55 @@
+@import "@woon-ui/dialog/css/dialog";
+
+[data-woon-scroll-lock] {
+  overflow: hidden;
+}
+
+[data-woon-dialog-overlay] {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 40, 48, 0.7);
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+}
+
+[data-woon-dialog-overlay][data-entered] {
+  opacity: 1;
+}
+
+[data-woon-dialog-content] {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: min(calc(100vw - 2rem), 30rem);
+  max-height: min(calc(100dvh - 2rem), 44rem);
+  overflow: auto;
+  padding: 1rem;
+  color: var(--color-foreground);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: 0.375rem;
+  box-shadow: 0 8px 0 rgba(39, 52, 60, 0.22);
+  opacity: 0;
+  transform: translate(-50%, calc(-50% + 8px)) scale(0.98);
+  transition:
+    opacity 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-woon-dialog-content][data-entered] {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+[data-woon-dialog-content][data-state="closed"] {
+  opacity: 0;
+  transform: translate(-50%, calc(-50% + 8px)) scale(0.98);
+}
+
+[data-woon-dialog-title] {
+  margin: 0;
+}
+
+[data-woon-dialog-description] {
+  margin: 0;
+}

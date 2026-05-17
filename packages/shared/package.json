@@ -19,6 +19,9 @@
     },
     "./room": {
       "types": "./src/room.ts"
+    },
+    "./room-participant": {
+      "types": "./src/room-participant.ts"
     }
   },
   "sideEffects": false
