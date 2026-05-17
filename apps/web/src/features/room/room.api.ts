@@ -51,3 +51,15 @@ export async function updateRoom(
 
   return response.data;
 }
+
+export async function startRoomGame(roomId: string, guestId: string) {
+  const response = await apiClient
+    .post(`rooms/${roomId}/start`, {
+      headers: {
+        "x-guest-id": guestId,
+      },
+    })
+    .json<ApiResponse<Room>>();
+
+  return response.data;
+}

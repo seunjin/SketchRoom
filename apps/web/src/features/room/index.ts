@@ -1,4 +1,10 @@
-export { createRoom, getRoom, getRooms, updateRoom } from "./room.api";
+export {
+  createRoom,
+  getRoom,
+  getRooms,
+  startRoomGame,
+  updateRoom,
+} from "./room.api";
 export {
   getRoomParticipants,
   joinRoom,

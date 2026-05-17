@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { RoomParticipant } from './entity/room-participant.entity';
 import { JoinRoomParticipantDto } from './dto/join-room-participant.dto';
 import { UpdateRoomParticipantDto } from './dto/update-room-participant.dto';
-import { Room } from '../room/entity/room.entity';
+import { Room, RoomStatus } from '../room/entity/room.entity';
 import { Guest } from '../guest/entity/guest.entity';
 import { verifyPassword } from '../common/util/password.util';
 import { AppException } from '../common/exception/app.exception';
@@ -131,6 +131,7 @@ export class RoomParticipantService {
       where: { roomId, guestId },
       relations: {
         guest: true,
+        room: true,
       },
     });
 
@@ -141,9 +142,19 @@ export class RoomParticipantService {
       );
     }
 
+    if (participant.room.status !== RoomStatus.WAITING) {
+      throw new AppException(ERROR_CODE.ROOM_NOT_WAITING, HttpStatus.CONFLICT);
+    }
+
     participant.isReady = updateRoomParticipantDto.isReady;
 
-    return this.roomParticipantRepository.save(participant);
+    const savedParticipant =
+      await this.roomParticipantRepository.save(participant);
+    const { room, ...participantWithoutRoom } = savedParticipant;
+
+    void room;
+
+    return participantWithoutRoom;
   }
 
   async leave(roomId: string, guestId: string) {
