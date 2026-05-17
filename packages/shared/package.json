@@ -2,5 +2,27 @@
   "name": "@sketch-room/shared",
   "private": true,
   "version": "0.0.0",
-  "type": "module"
+  "type": "module",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts"
+    },
+    "./api": {
+      "types": "./src/api.ts"
+    },
+    "./guest": {
+      "types": "./src/guest.ts"
+    },
+    "./health": {
+      "types": "./src/health.ts"
+    },
+    "./room": {
+      "types": "./src/room.ts"
+    },
+    "./room-participant": {
+      "types": "./src/room-participant.ts"
+    }
+  },
+  "sideEffects": false
 }

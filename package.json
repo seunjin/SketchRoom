@@ -9,6 +9,7 @@
     "build": "pnpm -r --if-present build",
     "lint": "pnpm -r --if-present lint",
     "db:migration:create": "pnpm --filter @sketch-room/server migration:create",
+    "db:migration:dev": "pnpm --filter @sketch-room/server migration:dev",
     "db:migration:generate": "pnpm --filter @sketch-room/server migration:generate",
     "db:migration:run": "pnpm --filter @sketch-room/server migration:run",
     "db:migration:revert": "pnpm --filter @sketch-room/server migration:revert",

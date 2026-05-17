@@ -15,4 +15,9 @@ export class CreateRoomDto {
   @IsOptional()
   @IsBoolean()
   isPublic?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(8)
+  password?: string;
 }

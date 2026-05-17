@@ -1,0 +1,44 @@
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
+import { CreateRoomDto } from './dto/create-room.dto';
+import { UpdateRoomDto } from './dto/update-room.dto';
+import { RoomService } from './room.service';
+
+@Controller('rooms')
+export class RoomController {
+  constructor(private readonly roomService: RoomService) {}
+
+  @Post()
+  create(
+    @Body() createRoomDto: CreateRoomDto,
+    @Headers('x-guest-id') guestId: string,
+  ) {
+    return this.roomService.create(createRoomDto, guestId);
+  }
+
+  @Get()
+  findAll() {
+    return this.roomService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.roomService.findOne(id);
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updateRoomDto: UpdateRoomDto,
+    @Headers('x-guest-id') guestId: string,
+  ) {
+    return this.roomService.update(id, updateRoomDto, guestId);
+  }
+}

@@ -8,6 +8,8 @@ SketchRoom은 정적 프론트엔드와 장시간 실행되는 백엔드 서버�
 - `apps/server`: NestJS HTTP/WebSocket 서버. Render에 배포한다.
 - PostgreSQL: 로컬은 Docker Compose, 운영은 Neon을 사용한다.
 
+프론트엔드 폴더 구조와 API 관리 기준은 `docs/frontend-architecture.md`를 따른다.
+
 ## 서버 모듈 기준
 
 NestJS 서버는 기능 단위 module을 기준으로 나눈다.
