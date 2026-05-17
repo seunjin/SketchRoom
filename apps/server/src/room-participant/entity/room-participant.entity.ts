@@ -21,4 +21,7 @@ export class RoomParticipant extends BaseTable {
 
   @Column({ default: false })
   isHost: boolean; //이 참가자가 방장인지 표시
+
+  @Column({ default: false })
+  isReady: boolean;
 }

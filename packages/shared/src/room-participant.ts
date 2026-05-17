@@ -5,6 +5,7 @@ export interface RoomParticipant {
   roomId: string;
   guestId: string;
   isHost: boolean;
+  isReady: boolean;
   createdAt: string;
   updatedAt: string;
   version: number;
@@ -13,6 +14,10 @@ export interface RoomParticipant {
 
 export interface JoinRoomParticipantRequest {
   password?: string;
+}
+
+export interface UpdateRoomParticipantRequest {
+  isReady: boolean;
 }
 
 export interface LeaveRoomParticipantResponse {

@@ -19,4 +19,5 @@ export type {
   JoinRoomParticipantRequest,
   LeaveRoomParticipantResponse,
   RoomParticipant,
+  UpdateRoomParticipantRequest,
 } from "./room-participant.js";
