@@ -23,19 +23,24 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
-          if printf '%s' "$PR_TITLE" | grep -Eiq '^\[codex\]'; then
-            echo 'PR 제목에 [codex] prefix를 사용할 수 없습니다.'
-            exit 1
-          fi
+          node <<'NODE'
+          const title = process.env.PR_TITLE ?? "";
+          const body = process.env.PR_BODY ?? "";
 
-          if ! printf '%s' "$PR_TITLE" | grep -Eq '[가-힣]'; then
-            echo 'PR 제목에는 한글 요약이 포함되어야 합니다.'
-            exit 1
-          fi
+          if (/^\[codex\]/i.test(title)) {
+            console.error("PR 제목에 [codex] prefix를 사용할 수 없습니다.");
+            process.exit(1);
+          }
 
-          for heading in '## 변경 내용' '## 확인 방법' '## 메모'; do
-            if ! printf '%s' "$PR_BODY" | grep -Fq "$heading"; then
-              echo "PR 본문에는 '$heading' 섹션이 필요합니다."
-              exit 1
-            fi
-          done
+          if (!/\p{Script=Hangul}/u.test(title)) {
+            console.error("PR 제목에는 한글 요약이 포함되어야 합니다.");
+            process.exit(1);
+          }
+
+          for (const heading of ["## 변경 내용", "## 확인 방법", "## 메모"]) {
+            if (!body.includes(heading)) {
+              console.error(`PR 본문에는 '${heading}' 섹션이 필요합니다.`);
+              process.exit(1);
+            }
+          }
+          NODE
