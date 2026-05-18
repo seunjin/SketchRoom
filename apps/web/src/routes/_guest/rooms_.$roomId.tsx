@@ -26,6 +26,7 @@ import {
   type Room,
   type RoomParticipant,
 } from "../../features/room";
+import { useGameRealtime } from "../../features/game-realtime";
 import { getApiErrorResponse } from "../../shared/api";
 
 export const Route = createFileRoute("/_guest/rooms_/$roomId")({
@@ -105,6 +106,28 @@ function WaitingRoomPage() {
   const currentPlayerCode = guestQuery.data?.displayCode ?? "READY";
   const roomError = getApiErrorResponse(roomQuery.error);
   const participantsError = getApiErrorResponse(participantsQuery.error);
+
+  useGameRealtime({
+    enabled: Boolean(room && isCurrentGuestInRoom),
+    guestId,
+    onGameStarted: (event) => {
+      queryClient.setQueryData(roomKeys.detail(roomId), event.room);
+      queryClient.invalidateQueries({ queryKey: roomKeys.lists() });
+
+      if (event.startedByGuestId !== guestId) {
+        toast({
+          title: "게임이 시작되었습니다",
+          description: event.room.title,
+        });
+      }
+
+      void navigate({
+        to: "/play/$roomId",
+        params: { roomId: event.roomId },
+      });
+    },
+    roomId,
+  });
 
   const leaveRoomMutation = useMutation({
     mutationFn: () => leaveRoom(roomId, guestId),

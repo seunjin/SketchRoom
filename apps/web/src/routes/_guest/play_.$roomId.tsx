@@ -23,6 +23,7 @@ import {
   type Room,
   type RoomParticipant,
 } from "../../features/room";
+import { useGameRealtime } from "../../features/game-realtime";
 import { getApiErrorResponse } from "../../shared/api";
 
 export const Route = createFileRoute("/_guest/play_/$roomId")({
@@ -85,6 +86,11 @@ function PlayRoomPage() {
   const participantsError = getApiErrorResponse(participantsQuery.error);
   const isLoading =
     roomQuery.isPending || participantsQuery.isPending || guestQuery.isPending;
+  const realtime = useGameRealtime({
+    enabled: Boolean(room && isCurrentGuestInRoom),
+    guestId,
+    roomId,
+  });
 
   function handleRefresh() {
     roomQuery.refetch();
@@ -186,9 +192,15 @@ function PlayRoomPage() {
               <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
                 <GameBoard />
                 <aside className="flex flex-col gap-4">
-                  <RoomPhasePanel room={room} />
+                  <RoomPhasePanel
+                    connectedCount={realtime.participants.length}
+                    connectionErrorMessage={realtime.errorMessage}
+                    connectionStatus={realtime.status}
+                    room={room}
+                  />
                   <ParticipantPanel
                     currentGuestId={guestId}
+                    onlineGuestIds={realtime.onlineGuestIds}
                     participants={displayParticipants}
                   />
                 </aside>
@@ -256,7 +268,17 @@ function GameBoard() {
   );
 }
 
-function RoomPhasePanel({ room }: { room: Room }) {
+function RoomPhasePanel({
+  connectedCount,
+  connectionErrorMessage,
+  connectionStatus,
+  room,
+}: {
+  connectedCount: number;
+  connectionErrorMessage: string;
+  connectionStatus: string;
+  room: Room;
+}) {
   return (
     <section className="rounded-md border-2 border-border bg-surface p-4 shadow-[0_6px_0_rgba(39,52,60,0.18)]">
       <div className="flex items-center justify-between gap-3">
@@ -271,16 +293,28 @@ function RoomPhasePanel({ room }: { room: Room }) {
       <div className="mt-4 grid grid-cols-2 gap-2">
         <PhaseStat label="방" value={room.title} />
         <PhaseStat label="모드" value="드로잉" />
+        <PhaseStat
+          label="연결"
+          value={getConnectionStatusLabel(connectionStatus)}
+        />
+        <PhaseStat label="접속 중" value={`${connectedCount}명`} />
       </div>
+      {connectionErrorMessage && (
+        <p className="mt-3 rounded-md border-2 border-danger bg-danger/10 p-3 text-xs font-black text-danger">
+          {connectionErrorMessage}
+        </p>
+      )}
     </section>
   );
 }
 
 function ParticipantPanel({
   currentGuestId,
+  onlineGuestIds,
   participants,
 }: {
   currentGuestId: string;
+  onlineGuestIds: Set<string>;
   participants: DisplayParticipant[];
 }) {
   return (
@@ -297,6 +331,7 @@ function ParticipantPanel({
           <ParticipantRow
             isMe={participant.guestId === currentGuestId}
             key={participant.id}
+            isOnline={onlineGuestIds.has(participant.guestId)}
             participant={participant}
             toneIndex={index}
           />
@@ -307,10 +342,12 @@ function ParticipantPanel({
 }
 
 function ParticipantRow({
+  isOnline,
   isMe,
   participant,
   toneIndex,
 }: {
+  isOnline: boolean;
   isMe: boolean;
   participant: DisplayParticipant;
   toneIndex: number;
@@ -332,6 +369,13 @@ function ParticipantRow({
         </p>
       </div>
       <div className="flex items-center gap-2">
+        {isOnline && (
+          <span
+            aria-label="접속 중"
+            className="size-2.5 rounded-full bg-accent"
+            title="접속 중"
+          />
+        )}
         {participant.isHost && (
           <Crown aria-label="호스트" className="size-4 text-primary" />
         )}
@@ -371,6 +415,26 @@ function PhaseStat({ label, value }: { label: string; value: string }) {
       <p className="mt-1 truncate text-sm font-black">{value}</p>
     </div>
   );
+}
+
+function getConnectionStatusLabel(status: string) {
+  if (status === "connected") {
+    return "온라인";
+  }
+
+  if (status === "connecting") {
+    return "연결 중";
+  }
+
+  if (status === "error") {
+    return "오류";
+  }
+
+  if (status === "disconnected") {
+    return "끊김";
+  }
+
+  return "대기";
 }
 
 function PlayerBadge({ code, name }: { code: string; name: string }) {
