@@ -1,8 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import type {
-  GamePresenceSnapshot,
-  GameStartedEvent,
-} from '@sketch-room/shared/game-realtime';
 import type { Room } from '@sketch-room/shared/room';
 import type { Server, Socket } from 'socket.io';
 
@@ -16,6 +12,17 @@ interface GamePresenceParticipantState {
 
 interface GamePresenceState extends GamePresenceParticipantState {
   socketIds: Set<string>;
+}
+
+interface GamePresenceSnapshotState {
+  participants: GamePresenceParticipantState[];
+  roomId: string;
+}
+
+interface GameStartedState {
+  room: Room;
+  roomId: string;
+  startedByGuestId: string;
 }
 
 interface GameSocketData {
@@ -116,7 +123,7 @@ export class GameRealtimeService {
   }
 
   broadcastGameStarted(roomId: string, startedByGuestId: string, room: Room) {
-    const event: GameStartedEvent = {
+    const event: GameStartedState = {
       room,
       roomId,
       startedByGuestId,
@@ -137,7 +144,7 @@ export class GameRealtimeService {
       .emit('game:presence', snapshot);
   }
 
-  private getPresenceSnapshot(roomId: string): GamePresenceSnapshot {
+  private getPresenceSnapshot(roomId: string): GamePresenceSnapshotState {
     const participants = Array.from(
       this.participantsByRoom.get(roomId)?.values() ?? [],
     )
