@@ -18,6 +18,8 @@ interface GameSocketData {
 
 @Injectable()
 export class GameRealtimeService {
+  // roomId -> guestId -> presence 상태입니다.
+  // 한 사용자가 여러 탭으로 접속할 수 있어 socketIds를 Set으로 보관합니다.
   private readonly participantsByRoom = new Map<
     string,
     Map<string, GamePresenceState>
@@ -36,14 +38,18 @@ export class GameRealtimeService {
     const socketData = socket.data as GameSocketData;
     const roomChannel = this.getRoomChannelName(roomId);
 
+    // disconnect 때 어떤 방/참가자였는지 찾기 위해 socket에 최소 정보만 저장합니다.
     socketData.guestId = participant.guestId;
     socketData.roomId = roomId;
+
+    // Socket.IO room은 broadcast 범위입니다. 같은 roomChannel의 socket만 이벤트를 받습니다.
     void socket.join(roomChannel);
 
     const roomParticipants = this.getRoomParticipants(roomId);
     const currentParticipant = roomParticipants.get(participant.guestId);
 
     if (currentParticipant) {
+      // 같은 guest가 새 탭으로 접속하면 사람 수는 늘리지 않고 연결 수만 늘립니다.
       currentParticipant.socketIds.add(socket.id);
       currentParticipant.connectionCount = currentParticipant.socketIds.size;
     } else {
@@ -54,6 +60,7 @@ export class GameRealtimeService {
       });
     }
 
+    // 개별 join 이벤트도 보내지만, UI는 아래 전체 snapshot만 봐도 동작합니다.
     this.server?.to(roomChannel).emit('game:joined', {
       participant: this.toPresenceParticipant(
         roomParticipants.get(participant.guestId)!,
@@ -81,6 +88,7 @@ export class GameRealtimeService {
     participant.socketIds.delete(socket.id);
     participant.connectionCount = participant.socketIds.size;
 
+    // 한 guest의 마지막 socket이 끊긴 경우에만 오프라인으로 처리합니다.
     if (participant.socketIds.size === 0) {
       roomParticipants.delete(guestId);
       this.server?.to(this.getRoomChannelName(roomId)).emit('game:left', {
@@ -95,6 +103,7 @@ export class GameRealtimeService {
 
     this.broadcastPresence(roomId);
 
+    // leave와 disconnect가 중복 호출되어도 다시 처리되지 않게 비웁니다.
     delete socketData.guestId;
     delete socketData.roomId;
   }
@@ -114,6 +123,8 @@ export class GameRealtimeService {
   private broadcastPresence(roomId: string) {
     const snapshot = this.getPresenceSnapshot(roomId);
 
+    // presence는 diff가 아니라 전체 스냅샷으로 보냅니다.
+    // 클라이언트는 받은 값으로 교체만 하면 됩니다.
     this.server
       ?.to(this.getRoomChannelName(roomId))
       .emit('game:presence', snapshot);

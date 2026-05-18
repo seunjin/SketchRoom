@@ -24,6 +24,8 @@ function getWebOrigins() {
     .filter(Boolean);
 }
 
+// Gateway는 WebSocket 이벤트의 Controller 역할입니다.
+// 클라이언트 이벤트를 받고, DB 검증 후 service에 실시간 처리를 맡깁니다.
 @WebSocketGateway({
   cors: {
     credentials: true,
@@ -40,14 +42,17 @@ export class GameRealtimeGateway
   ) {}
 
   afterInit(server: Server) {
+    // REST service에서도 broadcast해야 하므로 Socket.IO server를 공유합니다.
     this.gameRealtimeService.setServer(server);
   }
 
   handleConnection(client: Socket) {
+    // 연결 직후에는 아직 roomId/guestId를 모르므로 여기서는 확인 신호만 보냅니다.
     client.emit('game:connected');
   }
 
   handleDisconnect(client: Socket) {
+    // socket.data에 저장해둔 roomId/guestId를 기준으로 presence에서 제거합니다.
     this.gameRealtimeService.leaveSocket(client);
   }
 
@@ -64,6 +69,8 @@ export class GameRealtimeGateway
       return;
     }
 
+    // WebSocket 연결은 외부에서 바로 시도할 수 있으니,
+    // join 시점에 DB로 실제 방 참가자인지 확인합니다.
     const participant = await this.roomParticipantRepository.findOne({
       where: {
         guestId: payload.guestId,
@@ -83,6 +90,7 @@ export class GameRealtimeGateway
       return;
     }
 
+    // 검증된 참가자만 Socket.IO room에 넣고 presence를 갱신합니다.
     this.gameRealtimeService.joinRoom(client, payload.roomId, {
       connectionCount: 1,
       displayCode: participant.guest.displayCode,
@@ -104,6 +112,7 @@ export class GameRealtimeGateway
   private isJoinGameRoomRequest(
     payload: unknown,
   ): payload is JoinGameRoomRequest {
+    // socket payload는 외부 입력이라 unknown으로 좁혀야 lint/type 에러를 피할 수 있습니다.
     if (typeof payload !== 'object' || payload === null) {
       return false;
     }

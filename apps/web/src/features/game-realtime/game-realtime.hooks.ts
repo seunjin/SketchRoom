@@ -30,6 +30,7 @@ export function useGameRealtime({
   const onGameStartedRef = useRef(onGameStarted);
 
   useEffect(() => {
+    // socket handler는 오래 살아 있으므로 최신 callback만 ref로 갈아끼웁니다.
     onGameStartedRef.current = onGameStarted;
   }, [onGameStarted]);
 
@@ -46,6 +47,8 @@ export function useGameRealtime({
 
     socket.on("connect", () => {
       setStatus("connected");
+      // 연결만으로는 서버가 이 socket의 방/참가자를 모릅니다.
+      // connect 이후 game:join을 보내면 서버가 DB 검증 후 room에 붙입니다.
       socket.emit("game:join", joinRequest);
     });
 
@@ -74,6 +77,8 @@ export function useGameRealtime({
     socket.connect();
 
     return () => {
+      // route 이동/unmount 때 presence에서 바로 빠지게 합니다.
+      // leave가 못 가는 네트워크 단절은 서버 disconnect handler가 정리합니다.
       socket.emit("game:leave", joinRequest);
       socket.disconnect();
     };
@@ -81,6 +86,7 @@ export function useGameRealtime({
 
   const currentParticipants = useMemo(
     () =>
+      // 이전 방 snapshot이 다른 방 UI에 잠깐 섞이지 않도록 roomId를 확인합니다.
       enabled && presence?.roomId === roomId
         ? presence.participants
         : EMPTY_GAME_PRESENCE_PARTICIPANTS,
