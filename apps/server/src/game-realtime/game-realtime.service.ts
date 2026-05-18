@@ -1,13 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import type {
-  GamePresenceParticipant,
   GamePresenceSnapshot,
   GameStartedEvent,
 } from '@sketch-room/shared/game-realtime';
 import type { Room } from '@sketch-room/shared/room';
 import type { Server, Socket } from 'socket.io';
 
-interface GamePresenceState extends GamePresenceParticipant {
+interface GamePresenceParticipantState {
+  connectionCount: number;
+  displayCode: string;
+  guestId: string;
+  isHost: boolean;
+  nickname: string;
+}
+
+interface GamePresenceState extends GamePresenceParticipantState {
   socketIds: Set<string>;
 }
 
@@ -33,7 +40,7 @@ export class GameRealtimeService {
   joinRoom(
     socket: Socket,
     roomId: string,
-    participant: GamePresenceParticipant,
+    participant: GamePresenceParticipantState,
   ) {
     const socketData = socket.data as GameSocketData;
     const roomChannel = this.getRoomChannelName(roomId);
@@ -169,7 +176,7 @@ export class GameRealtimeService {
 
   private toPresenceParticipant(
     participant: GamePresenceState,
-  ): GamePresenceParticipant {
+  ): GamePresenceParticipantState {
     return {
       connectionCount: participant.socketIds.size,
       displayCode: participant.displayCode,
