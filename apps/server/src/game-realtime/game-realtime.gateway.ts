@@ -10,7 +10,7 @@ import {
 import type {
   GameRealtimeErrorEvent,
   JoinGameRoomRequest,
-} from '@sketch-room/shared';
+} from '@sketch-room/shared/game-realtime';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Server, Socket } from 'socket.io';
 import { Repository } from 'typeorm';

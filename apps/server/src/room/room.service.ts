@@ -10,7 +10,7 @@ import { RoomParticipant } from '../room-participant/entity/room-participant.ent
 import { AppException } from '../common/exception/app.exception';
 import { ERROR_CODE } from '../common/constant/error-code.constant';
 import { GameRealtimeService } from '../game-realtime/game-realtime.service';
-import type { Room as SharedRoom } from '@sketch-room/shared';
+import type { Room as SharedRoom } from '@sketch-room/shared/room';
 
 @Injectable()
 export class RoomService {

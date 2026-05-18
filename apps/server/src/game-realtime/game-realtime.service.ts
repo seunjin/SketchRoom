@@ -3,8 +3,8 @@ import type {
   GamePresenceParticipant,
   GamePresenceSnapshot,
   GameStartedEvent,
-  Room,
-} from '@sketch-room/shared';
+} from '@sketch-room/shared/game-realtime';
+import type { Room } from '@sketch-room/shared/room';
 import type { Server, Socket } from 'socket.io';
 
 interface GamePresenceState extends GamePresenceParticipant {

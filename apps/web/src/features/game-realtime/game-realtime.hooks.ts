@@ -6,7 +6,7 @@ import type {
   GameRealtimeErrorEvent,
   GameStartedEvent,
   JoinGameRoomRequest,
-} from "@sketch-room/shared";
+} from "@sketch-room/shared/game-realtime";
 import { createGameSocket } from "./game-realtime.client";
 
 const EMPTY_GAME_PRESENCE_PARTICIPANTS: GamePresenceParticipant[] = [];

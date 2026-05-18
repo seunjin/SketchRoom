@@ -17,6 +17,9 @@
     "./health": {
       "types": "./src/health.ts"
     },
+    "./game-realtime": {
+      "types": "./src/game-realtime.ts"
+    },
     "./room": {
       "types": "./src/room.ts"
     },
