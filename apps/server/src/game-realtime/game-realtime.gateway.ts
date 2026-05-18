@@ -7,15 +7,21 @@ import {
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
-import type {
-  GameRealtimeErrorEvent,
-  JoinGameRoomRequest,
-} from '@sketch-room/shared/game-realtime';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Server, Socket } from 'socket.io';
 import { Repository } from 'typeorm';
 import { RoomParticipant } from '../room-participant/entity/room-participant.entity';
 import { GameRealtimeService } from './game-realtime.service';
+
+interface JoinGameRoomPayload {
+  guestId: string;
+  roomId: string;
+}
+
+interface GameRealtimeErrorPayload {
+  code: string;
+  message: string;
+}
 
 function getWebOrigins() {
   return (process.env.WEB_ORIGIN ?? 'http://localhost:5173')
@@ -59,7 +65,7 @@ export class GameRealtimeGateway
   @SubscribeMessage('game:join')
   async handleJoinGameRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() payload: JoinGameRoomRequest,
+    @MessageBody() payload: unknown,
   ) {
     if (!this.isJoinGameRoomRequest(payload)) {
       this.emitError(client, {
@@ -69,12 +75,14 @@ export class GameRealtimeGateway
       return;
     }
 
+    const { guestId, roomId } = payload;
+
     // WebSocket 연결은 외부에서 바로 시도할 수 있으니,
     // join 시점에 DB로 실제 방 참가자인지 확인합니다.
     const participant = await this.roomParticipantRepository.findOne({
       where: {
-        guestId: payload.guestId,
-        roomId: payload.roomId,
+        guestId,
+        roomId,
       },
       relations: {
         guest: true,
@@ -91,7 +99,7 @@ export class GameRealtimeGateway
     }
 
     // 검증된 참가자만 Socket.IO room에 넣고 presence를 갱신합니다.
-    this.gameRealtimeService.joinRoom(client, payload.roomId, {
+    this.gameRealtimeService.joinRoom(client, roomId, {
       connectionCount: 1,
       displayCode: participant.guest.displayCode,
       guestId: participant.guestId,
@@ -105,13 +113,13 @@ export class GameRealtimeGateway
     this.gameRealtimeService.leaveSocket(client);
   }
 
-  private emitError(client: Socket, error: GameRealtimeErrorEvent) {
+  private emitError(client: Socket, error: GameRealtimeErrorPayload) {
     client.emit('game:error', error);
   }
 
   private isJoinGameRoomRequest(
     payload: unknown,
-  ): payload is JoinGameRoomRequest {
+  ): payload is JoinGameRoomPayload {
     // socket payload는 외부 입력이라 unknown으로 좁혀야 lint/type 에러를 피할 수 있습니다.
     if (typeof payload !== 'object' || payload === null) {
       return false;
