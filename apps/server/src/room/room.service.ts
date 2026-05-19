@@ -9,6 +9,8 @@ import { hashPassword } from '../common/util/password.util';
 import { RoomParticipant } from '../room-participant/entity/room-participant.entity';
 import { AppException } from '../common/exception/app.exception';
 import { ERROR_CODE } from '../common/constant/error-code.constant';
+import { GameRealtimeService } from '../game-realtime/game-realtime.service';
+import type { Room as SharedRoom } from '@sketch-room/shared/room';
 
 @Injectable()
 export class RoomService {
@@ -16,6 +18,7 @@ export class RoomService {
     @InjectRepository(Room)
     private readonly roomRepository: Repository<Room>,
     private readonly dataSource: DataSource,
+    private readonly gameRealtimeService: GameRealtimeService,
   ) {}
   async create(createRoomDto: CreateRoomDto, guestId: string) {
     const isPublic = createRoomDto.isPublic ?? true;
@@ -135,7 +138,7 @@ export class RoomService {
   }
 
   async start(id: string, guestId: string) {
-    return this.dataSource.transaction(async (manager) => {
+    const startedRoom = await this.dataSource.transaction(async (manager) => {
       const room = await manager.findOne(Room, {
         where: { id },
         lock: { mode: 'pessimistic_write' },
@@ -186,6 +189,22 @@ export class RoomService {
 
       return this.withoutPasswordHash(savedRoom);
     });
+
+    this.gameRealtimeService.broadcastGameStarted(
+      id,
+      guestId,
+      this.toSharedRoom(startedRoom),
+    );
+
+    return startedRoom;
+  }
+
+  private toSharedRoom(room: Omit<Room, 'passwordHash'>): SharedRoom {
+    return {
+      ...room,
+      createdAt: room.createdAt.toISOString(),
+      updatedAt: room.updatedAt.toISOString(),
+    };
   }
 
   private withoutPasswordHash(room: Room) {
